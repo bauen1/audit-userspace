@@ -119,17 +119,8 @@ elif [ $OnlyCheck -eq 1 ] ; then
 	exit 0
 fi
 
-# Otherwise we install the new file
-if [ -f ${DestinationFile} ]; then
-	cp ${DestinationFile} ${DestinationFile}.${ASuffix}
-fi
-# We copy the file so that it gets the right selinux lable
-cp ${TmpRules} ${DestinationFile}
-chmod 0640 ${DestinationFile}
-# Restore context on MLS system. /tmp is SystemLow & audit.rules is SystemHigh
-if [ -x /usr/sbin/restorecon ] ; then
-	/usr/sbin/restorecon -F ${DestinationFile}
-fi
+# Otherwise we install the new file, and make a backup, fix the selinux label if necessary
+install --backup=simple --suffix=".${ASuffix}" -Z --mode=0640 "${TmpRules}" "${DestinationFile}"
 rm -f ${TmpRules}
 
 try_load
